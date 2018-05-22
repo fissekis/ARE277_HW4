@@ -1,0 +1,151 @@
+---
+title: "HW4_ARE277"
+author: "Ann Willis"
+date: "May 21, 2018"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+_1. Please explain the drivation of equation 8 in Hartman's paper and show how it is equivalent to the formulation we used in class._
+
+In Hartman (1976), he develops a model that considers when (or whether) to harvest a standing forest when both the stumpage vlue of the lumber and the amenity value of the standing forest are taken into account. After systematically expanding the model to include both values to determine the time of a single cut, Hartman explores the model formulation for an indefinite amount of rotations. The equation for the infinite rotation model is:
+
+$$U(t) = G(t)[e^{-rt}+e^{-2rt}+e^{-3rt}+...]+\int_0^te^{-rx}F(x)dx[1+e^{-rt}+e^{-2rt}+...]$$
+$$= \underbrace{\frac{G(t)e^{-rt}+\int_0^te^{-rx}F(x)dx}{1-e^{-rt}}}_{\text {Hartman (1976) model}}$$
+Where
+$G(t)$ = the stumpage value of the lumber in a forest of age _t_,
+
+$r$ = the discount rate, and
+
+$F(x)$ = amenity value of the forest while it is still standing.
+
+In other words, the model uses the integral of the flow of discounted amenity values of the forest while it is still standing plus the discounted value of the timber when the forest is harvested over an infinite rotation cycle.
+
+In class, we used the formation:
+
+$$PV(T) = [pW(T)-c+A(T)][e^{-rt}+e^{-2rt}+...]+A(T)$$
+Simplifying the geometric series, we get:
+
+$$PV(T) = \underbrace{\frac{[pW(T)-c+A(T)]}{1-e^{-rt}}}_a+\underbrace{A(T)}_b$$
+Intuitively, our class formulation for PV(T) makes sense. Part _a_ of the model refers to the discounted value for both the lumber and amenity values at the future cut time, T. However, assuming $T \ne$ right now, we also have to account for the immediate value of the amenities. Thus, we include term _b_ in the model.
+
+To show that the two forumlations are equivalent, we analyze the integral of the flow of discounted recreational values of the forest, represented by the term 
+$$\int_0^te^{-rx}F(x)dx$$
+Using integration by parts, we get:
+
+__Am I on the right track here?__
+
+_2. Plot and discuss the current and mean annual increment for Douglas Fir. What is the optimal time to cut from a Forrester perspective?_
+
+__I can see how to plot the Faustmann model, but not how to generate a plot of CAI and MAI.__
+
+The current annual increment (CAI) is defined as the increase in volume of a tree over 1 year or averaged over some period (for example, 10 years). It refers to the marginal change in timber product. The mean annual increment (MAI) is defined at the total volume of the stand divided by the number of years the stand has been growing. It refers to the average product available in a stand of trees over time.
+
+Forestry focuses on maximizing MAI. To maximize MAI, we look for the time of cut, which occurs where MAI=CAI. The time when MAI-CAI is noted at $t_{cMAI}$, the culmination of the mean annual increment. More simply written, $t_{cMAI} = T^*$ = optimal time of cutting to maximize MAI.
+
+Mathematically, we use the Faustmann Formula to consider the optimal time to cut. The Faustmann formula is written as:
+
+$$\frac{\dot{W}}{W-\frac{c}{p}}=\frac{r}{1-e^{-rT}}$$
+The Forester Rule looks at what happens when  r=0 and c=0; that is, when the discount rate and costs of cutting are zero. Given those conditions, the Faustmann rule simplifies to:
+
+$$\frac{\dot{W}}{W}=\frac{1}{T}$$
+$$\dot{W}=\frac{W}{T} = t^*_{cMAI}$$
+Under these conditions, there is no practical reason to wait to cut. 
+
+_3. Describe the three different amenity value functions (cases)._
+
+``` {r amenity analysis Case 1, echo=TRUE}
+#define the discount rate, d
+d <- 0.05
+
+#define amenity case 1 as a function of time, t, in years
+a1 <- function (t) exp(-d*t)
+
+#plot the results
+curve(a1,0,100,n=101, main = "Case 1", xlab="years", ylab = "amenity value ($)")
+```
+
+Case 1 describes a forest with declining amenity values. This could occur if the primary amenity value were a recreational activity such as hunting, where younger forests provided less cover for prey, allowing hunters better visibility. Thus, as the forest gets older, its amenity value declines.
+
+``` {r Case 2 analysis, echo=TRUE}
+#define the coefficients
+b1 <- 0.002
+b2 <- 0.000155
+b3 <- -0.0000008
+
+#t is defined in Case 1
+#define amenity growth rate for Case 2
+a2 <- function (t) (b1*t)+(b2*t^2)+(b3*t^3)
+curve(a2,0,100,n=101, main = "Case 2", xlab="years", ylab = "amenity value ($)")
+
+```
+
+Case 2 defines a forest with generally increasing amenity values, though the rate of increase is not constant. There appear to be two inflection points, one near 20 years and another near 90 years. Thus, depending on the timber price, it might be more profitable to cut early, before the amenity value begins to increase more rapidly, or wait until the amenity value slows in its growth.
+``` {r Case 3 analysis, echo=TRUE}
+#assign coefficient values
+b4 <- 5
+b5 <- 5/140
+
+#t is defined in Case 1
+
+#define amenity value function for Case 3
+a3 <- function (t) (b4*t)+(b5*t^2)
+curve(a3,0,100,n=101, main = "Case 3", xlab="years", ylab = "amenity value ($)")
+```
+
+Case 3 illustrates a forest with amenity value that has a more constant increasing trend. In this case, depending on the relative value of the lumber, there may not be a time where it is economically advantageous to cut.
+
+_4. For a range of prives of amenity value,_ $P_a = {1, 10, 50, 100, 500, 1000}$ _and for a range of discount rates r = {2%, 4%, 6%, 8%, 10%}, find and discuss the optimal rotation length with timber values only and with timber values and amenity values (only include one amenity value at a time)._
+
+The optimal rotation length for timber values only is determined using the Faustmann formula:
+
+$$\frac{\dot{W}}{W-\frac{c}{p}}=\frac{r}{1-e^{-rT}}$$
+Let:
+$P=4.5$, price of timber
+$w(t)=e^{\alpha+\beta/t}$, quantity of timber at time t
+$\alpha=10.688$, numerical specification based on Douglas fir data
+$\beta=-74.984$, numerical specification based on Douglas fir data
+$C=1000$, cost of replanting
+
+```{r optimal rotation length analysis, echo=TRUE}
+#with timber values only
+P <- 4.5
+a <- 10.688
+b <- -74.984
+t <- runif(101,0,100)
+W <- exp(a+(b/t))
+W_dot <- -(b/(t^2))*exp(a+(b/t))
+c <- 1000
+r <- 0.02
+#r <- c(0.02,0.04,0.06,0.08,0.10)
+
+#create a dataframe for the left side of the Faustmann function
+df <- data.frame(t,W_dot/(W-(c/P)))
+df_order <- df[order(t),]
+plot(df_order, type="l", xlab="Age, t (yr)", ylab="Growth Rate (/yr)")
+
+#analyze the right side of the Faustmann function
+delta <- function (T) r/(1-exp^(-r*T))
+
+#Analyze the Faustmann formula as a whole for a range of r values
+library(rootSolve)
+F_model <- function (x) (r/(1-exp^(-r*x)))-(exp(a+(b/x))/(-(b/(x^2))*exp(a+(b/x))-c/P))
+uniroot(F_model,c(0,1000))
+
+curve(F_model,0,100)
+
+#with timber and amenity value
+P_a <- c(1,10,50,100,500,1000)
+
+```
+
+_5. Discuss how the different forms of amenity values lead to differences in the optimal rotation length. Be sure to discuss differences across the different amenity value cases along with differences across discount rates and amenity prices._
+
+
+
+
